@@ -1,0 +1,2 @@
+# TelegramChaID
+一个依靠CloudFlareWorker的TelegramID查询Bot
