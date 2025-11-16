@@ -1,0 +1,145 @@
+function escapeMarkdownV2(text) {
+	if (!text) return '';
+	return text.replace(/([\_*\[\]\(\)~`>#+\-=|\{}\.!])/g, '\\$1');
+}
+
+
+function createReplyKeyboard() {
+	return {
+		keyboard: [
+			[
+				{ 
+					text: "👤 查询用户 ID",
+					request_user: {
+						request_id: 1, 
+						user_is_bot: false, 
+					}
+				},
+				{
+					text: "🤖 查询机器人 ID",
+					request_user: {
+						request_id: 2,
+						user_is_bot: true, 
+					}
+				}
+			],
+			[
+				{
+					text: "👥 查询群组/频道 ID",
+					request_chat: {
+						request_id: 3,
+						chat_is_channel: false, 
+					}
+				},
+				{
+					text: "📢 查询频道 ID",
+					request_chat: {
+						request_id: 4,
+						chat_is_channel: true, 
+					}
+				}
+			]
+		],
+		resize_keyboard: true, 	
+		one_time_keyboard: false 
+	};
+}
+
+async function sendResponse(chatId, text, env, reply_markup = null) {
+	const telegramApiUrl = `https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`;
+	
+	const body = {
+		chat_id: chatId,
+		text: text,
+		parse_mode: 'MarkdownV2',
+	};
+
+	if (reply_markup) {
+		body.reply_markup = reply_markup;
+	}
+
+	const response = await fetch(telegramApiUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(body),
+	});
+
+	if (!response.ok) {
+		console.error('Telegram API error:', response.status, await response.text());
+	}
+
+	return new Response('Message sent', { status: 200 });
+}
+
+
+async function handleStartCommand(message, env) {
+	const chatId = message.chat.id;
+	const userId = message.from.id;
+
+	const now = new Date();
+	const beijingTime = now.toLocaleString('zh-CN', {
+		timeZone: 'Asia/Shanghai',
+		hour12: false,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit'
+	});
+
+	let rawAdText = '';
+	if (env.AD_TEXT && env.AD_TEXT.toLowerCase() !== 'none') {
+		rawAdText = escapeMarkdownV2(env.AD_TEXT); 
+	}
+
+	let responseText = `👋 欢迎使用 Telegram ID 查询助手 
+🕰 当前时间： ${escapeMarkdownV2(beijingTime)}
+📌 您的用户ID：\`${userId}\``;
+	
+	if (rawAdText) {
+		responseText += `\n\n${rawAdText}`; 
+	}
+
+
+	return sendResponse(chatId, responseText, env, createReplyKeyboard());
+}
+
+
+async function handleRequest(request, env) {
+	if (request.method !== 'POST') {
+		return new Response('OK', { status: 200 });
+	}
+
+	try {
+		const payload = await request.json();
+
+		const chatId = payload.message ? payload.message.chat.id : null;
+
+		if (payload.message && payload.message.user_shared && chatId) {
+			const sharedUserId = payload.message.user_shared.user_id;
+			const messageText = `✅ **ID 查询成功！**\n\n您分享的对象的 ID 是：\`${sharedUserId}\``;
+			return sendResponse(chatId, messageText, env, createReplyKeyboard());
+		}
+
+		if (payload.message && payload.message.chat_shared && chatId) {
+			const sharedChatId = payload.message.chat_shared.chat_id; 
+			const messageText = `✅ **ID 查询成功！**\n\n您分享的群组/频道的 ID 是：\`${sharedChatId}\``;
+			return sendResponse(chatId, messageText, env, createReplyKeyboard());
+		}
+		
+		if (payload.message && payload.message.text && payload.message.text.startsWith('/start')) {
+			return handleStartCommand(payload.message, env);
+		}
+
+		return new Response('OK', { status: 200 });
+
+	} catch (e) {
+		console.error('Error processing request:', e.message);
+		return new Response('Bad Request', { status: 400 });
+	}
+}
+
+export default {
+	fetch: handleRequest,
+};
