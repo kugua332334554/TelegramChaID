@@ -1,9 +1,10 @@
+//转义
 function escapeMarkdownV2(text) {
 	if (!text) return '';
 	return text.replace(/([\_*\[\]\(\)~`>#+\-=|\{}\.!])/g, '\\$1');
 }
 
-
+//键盘
 function createReplyKeyboard() {
 	return {
 		keyboard: [
@@ -44,7 +45,7 @@ function createReplyKeyboard() {
 		one_time_keyboard: false 
 	};
 }
-
+//message
 async function sendResponse(chatId, text, env, reply_markup = null) {
 	const telegramApiUrl = `https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`;
 	
@@ -71,7 +72,7 @@ async function sendResponse(chatId, text, env, reply_markup = null) {
 	return new Response('Message sent', { status: 200 });
 }
 
-
+//启动消息
 async function handleStartCommand(message, env) {
 	const chatId = message.chat.id;
 	const userId = message.from.id;
@@ -105,7 +106,7 @@ async function handleStartCommand(message, env) {
 	return sendResponse(chatId, responseText, env, createReplyKeyboard());
 }
 
-
+//结果
 async function handleRequest(request, env) {
 	if (request.method !== 'POST') {
 		return new Response('OK', { status: 200 });
@@ -133,7 +134,7 @@ async function handleRequest(request, env) {
 		}
 
 		return new Response('OK', { status: 200 });
-
+//容错
 	} catch (e) {
 		console.error('Error processing request:', e.message);
 		return new Response('Bad Request', { status: 400 });
