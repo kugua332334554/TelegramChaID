@@ -1,9 +1,14 @@
 # TelegramChaID
 一个依靠CloudFlareWorker的TelegramID查询Bot
 
+# 效果展示
+
+<img width="2000" height="772" alt="image" src="https://github.com/user-attachments/assets/6c54db09-9617-42de-a833-fab7d03cd640" />
+
+# 版权声明
 本机器人用于查询用户ID和其他功能，由 @Ld_wp 编写，转载请标注
 
-**如何部署**
+# 部署方式
 1.登录 CloudFlare.com 注册账户后在侧边栏选择 WorkerAndPages 并新建一个Worker
 
 2.将chaid.js所有代码复制到代码控制台
