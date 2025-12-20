@@ -6,7 +6,7 @@
 <img width="2000" height="772" alt="image" src="https://github.com/user-attachments/assets/6c54db09-9617-42de-a833-fab7d03cd640" />
 
 # 版权声明
-本机器人用于查询用户ID和其他功能，由 @Ld_wp 编写，转载请标注
+本机器人用于查询用户ID和其他功能，由 @Ld_wp1 编写，转载请标注
 
 # 部署方式
 1.登录 CloudFlare.com 注册账户后在侧边栏选择 WorkerAndPages 并新建一个Worker
@@ -26,4 +26,3 @@ AD_TEXT - 广告信息，用于展示在启动消息下方，不需要的填写n
 6./start看一看吧
 
 
-赞助我 https://dianbao.shop
